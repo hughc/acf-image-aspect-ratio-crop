@@ -281,6 +281,10 @@ class npx_acf_plugin_image_aspect_ratio_crop
                             $post->ID,
                             'acf_image_aspect_ratio_crop_coordinates'
                         );
+                        delete_post_meta(
+                            $post->ID,
+                            'acf_image_aspect_ratio_crop_focus_point'
+                        );
                     }
                 }
             }
@@ -822,6 +826,7 @@ class npx_acf_plugin_image_aspect_ratio_crop
             'acf_image_aspect_ratio_crop',
             'acf_image_aspect_ratio_crop_original_image_id',
             'acf_image_aspect_ratio_crop_coordinates',
+            'acf_image_aspect_ratio_crop_focus_point',
         ];
         foreach ($keys as $key) {
             $value = get_post_meta($attachment_id, $key, true);
@@ -1319,6 +1324,27 @@ class npx_acf_plugin_image_aspect_ratio_crop
             true
         );
 
+        // Focus point: percentage left/top within the crop area, ready to use
+        // as a CSS background-position. Only stored when the editor sent one.
+        if (isset($data['focusLeft']) && isset($data['focusTop'])) {
+            $clamp = function ($value) {
+                return round(
+                    max(0, min(100, (float) $value)),
+                    1
+                );
+            };
+
+            add_post_meta(
+                $attachment_id,
+                'acf_image_aspect_ratio_crop_focus_point',
+                [
+                    'left' => $clamp($data['focusLeft']),
+                    'top' => $clamp($data['focusTop']),
+                ],
+                true
+            );
+        }
+
         /* Timestamp so we can purge unattached crop attachments periodically after specific time
          (like a week or so) */
         add_post_meta(
@@ -1631,3 +1657,54 @@ class npx_acf_plugin_image_aspect_ratio_crop
 
 // initialize
 $GLOBALS['acf_image_aspect_ratio_crop'] = new npx_acf_plugin_image_aspect_ratio_crop();
+
+// two helper functions to assist in utilising the focus point meta, if present
+
+/**
+ * Get the saved focus point for a cropped attachment.
+ *
+ * @param int $attachment_id Attachment ID of the cropped image.
+ * @return array|null ['left' => float, 'top' => float] or null when unset.
+ */
+function aiarc_get_focus_point($attachment_id)
+{
+    $focus_point = get_post_meta(
+        $attachment_id,
+        'acf_image_aspect_ratio_crop_focus_point',
+        true
+    );
+
+    if (
+        !is_array($focus_point) ||
+        !isset($focus_point['left'], $focus_point['top'])
+    ) {
+        return null;
+    }
+
+    return [
+        'left' => (float) $focus_point['left'],
+        'top' => (float) $focus_point['top'],
+    ];
+}
+
+/**
+ * Build a CSS background-position declaration from a cropped attachment's
+ * focus point, for use with background-size: cover.
+ *
+ * @param int $attachment_id Attachment ID of the cropped image.
+ * @return string e.g. "background-position: 38.5% 62%;" or an empty string.
+ */
+function aiarc_focus_point_style($attachment_id)
+{
+    $focus_point = aiarc_get_focus_point($attachment_id);
+
+    if (!$focus_point) {
+        return '';
+    }
+
+    return sprintf(
+        'background-position: %s%% %s%%;',
+        $focus_point['left'],
+        $focus_point['top']
+    );
+}

@@ -217,6 +217,12 @@ import { sprintf } from 'sprintf-js';
         .off('click', '.js-acf-image-aspect-ratio-crop-reset')
         .on('click', '.js-acf-image-aspect-ratio-crop-reset', () => {
           this.cropper.reset();
+          // Reset the focus point back to the centre of the crop area too
+          if (this.focus) {
+            this.focus.left = 50;
+            this.focus.top = 50;
+            this.positionFocusDot();
+          }
         });
 
       $(document)
@@ -254,6 +260,15 @@ import { sprintf } from 'sprintf-js';
             key: acfKey,
             post_id: postId,
           };
+
+          // Read the focus point straight off the dot so the value always
+          // belongs to the modal that is open, even with several crop fields
+          // on one page. Fields without the editor send nothing extra.
+          var focus = self.readFocusFromDom();
+          if (focus) {
+            data.focusLeft = focus.left;
+            data.focusTop = focus.top;
+          }
 
           $('.js-acf-image-aspect-ratio-crop-crop').prop('disabled', true);
           $('.js-acf-image-aspect-ratio-crop-reset').prop('disabled', true);
@@ -676,6 +691,7 @@ import { sprintf } from 'sprintf-js';
       var url = data.attachment.attributes.url;
       var id = data.attachment.attributes.id;
       field = data.field;
+      var self = this;
 
       document.addEventListener('keydown', this.escapeHandlerBound);
 
@@ -703,6 +719,12 @@ import { sprintf } from 'sprintf-js';
         checkCrossOrigin: false,
         checkOrientation: false,
         responsive: true,
+        // The crop box only exists once the image has loaded, so the focus
+        // dot has to be added on the cropper's ready event rather than right
+        // after construction.
+        ready: function() {
+          self.initFocusEditor();
+        },
       };
 
       if (cropType === 'pixel_size') {
@@ -736,7 +758,14 @@ import { sprintf } from 'sprintf-js';
         .data('coordinates');
 
       if (coordinates) {
-        options.data = coordinates;
+        // Only hand the crop rectangle to Cropper; any focus point values
+        // carried in the same payload are consumed by the focus editor.
+        options.data = {
+          x: coordinates.x,
+          y: coordinates.y,
+          width: coordinates.width,
+          height: coordinates.height,
+        };
       }
 
       // prettier-ignore
@@ -804,11 +833,19 @@ import { sprintf } from 'sprintf-js';
     },
 
     cropComplete: function(data) {
-      // Save coordinates so they are remembered even without saving the post first
+      // Save coordinates so they are remembered even without saving the post
+      // first, together with the focus point percentages
+      var cropData = this.cropper.getData(true);
+
+      if (this.focus) {
+        cropData.focusLeft = Math.round(this.focus.left * 10) / 10;
+        cropData.focusTop = Math.round(this.focus.top * 10) / 10;
+      }
+
       $(field)
         .find('.acf-image-uploader-aspect-ratio-crop')
-        .data('coordinates', this.cropper.getData(true))
-        .attr('data-coordinates', JSON.stringify(this.cropper.getData(true)));
+        .data('coordinates', cropData)
+        .attr('data-coordinates', JSON.stringify(cropData));
 
       // Cropping successful, change image to cropped version
       this.cropper.destroy();
@@ -851,6 +888,145 @@ import { sprintf } from 'sprintf-js';
       }
     },
 
+    /*
+     *  Focus point editor
+     *
+     *  A draggable dot inside the crop area holding % left / % top values
+     *  usable directly as a CSS background-position. The dot is a child of
+     *  .cropper-crop-box positioned in percentages, so it keeps its relative
+     *  position when the crop bounds change without any extra bookkeeping.
+     */
+
+    focusEditorEnabled: function() {
+      return (
+        $(this.$field || field)
+          .find('.acf-image-uploader-aspect-ratio-crop')
+          .data('focus_point') === 1
+      );
+    },
+
+    initFocusEditor: function() {
+      if (!this.focusEditorEnabled()) {
+        this.focus = null;
+        return;
+      }
+
+      var coordinates = $(field)
+        .find('.acf-image-uploader-aspect-ratio-crop')
+        .data('coordinates');
+
+      this.focus = {
+        left:
+          coordinates && typeof coordinates.focusLeft === 'number'
+            ? coordinates.focusLeft
+            : 50,
+        top:
+          coordinates && typeof coordinates.focusTop === 'number'
+            ? coordinates.focusTop
+            : 50,
+      };
+
+      var dot = document.createElement('div');
+      dot.className = 'aiarc-focus-point';
+      dot.title = aiarc_translations.focus_point;
+      document
+        .querySelector('.cropper-crop-box')
+        .appendChild(dot);
+
+      this.bindFocusDrag(dot);
+      this.positionFocusDot();
+    },
+
+    focusDot: function() {
+      return document.querySelector(
+        '.acf-image-aspect-ratio-crop-backdrop .aiarc-focus-point'
+      );
+    },
+
+    positionFocusDot: function() {
+      var dot = this.focusDot();
+
+      if (!dot || !this.focus) return;
+
+      dot.style.left = this.focus.left + '%';
+      dot.style.top = this.focus.top + '%';
+    },
+
+    readFocusFromDom: function() {
+      var dot = this.focusDot();
+
+      if (!dot) return null;
+
+      return {
+        left: parseFloat(dot.style.left) || 0,
+        top: parseFloat(dot.style.top) || 0,
+      };
+    },
+
+    clampFocus: function(clientX, clientY) {
+      var box = document
+        .querySelector('.cropper-crop-box')
+        .getBoundingClientRect();
+
+      if (!box.width || !box.height) return;
+
+      this.focus.left = Math.min(
+        100,
+        Math.max(0, ((clientX - box.left) / box.width) * 100)
+      );
+      this.focus.top = Math.min(
+        100,
+        Math.max(0, ((clientY - box.top) / box.height) * 100)
+      );
+    },
+
+    bindFocusDrag: function(dot) {
+      var self = this;
+
+      this.focusDragHandler = function(event) {
+        if (event.type === 'pointerdown') {
+          event.preventDefault();
+          dot.classList.add('-dragging');
+          dot.setPointerCapture(event.pointerId);
+          self.clampFocus(event.clientX, event.clientY);
+          self.positionFocusDot();
+          return;
+        }
+
+        // With the pointer captured, moves and the release are delivered to
+        // the dot itself, so no document level listeners are needed
+        if (event.type === 'pointermove') {
+          if (dot.hasPointerCapture(event.pointerId)) {
+            self.clampFocus(event.clientX, event.clientY);
+            self.positionFocusDot();
+          }
+          return;
+        }
+
+        if (event.type === 'pointerup') {
+          dot.releasePointerCapture(event.pointerId);
+          dot.classList.remove('-dragging');
+        }
+      };
+
+      ['pointerdown', 'pointermove', 'pointerup'].forEach(function(type) {
+        dot.addEventListener(type, self.focusDragHandler);
+      });
+    },
+
+    teardownFocusDot: function() {
+      var dot = this.focusDot();
+
+      if (dot && this.focusDragHandler) {
+        ['pointerdown', 'pointermove', 'pointerup'].forEach(function(type) {
+          dot.removeEventListener(type, this.focusDragHandler);
+        }, this);
+      }
+
+      this.focusDragHandler = null;
+      this.focus = null;
+    },
+
     closeModal: function() {
       if (this.isFirstCrop) {
         // If it's the first time cropping an image, we don't want to
@@ -860,6 +1036,7 @@ import { sprintf } from 'sprintf-js';
       }
       $('.acf-image-aspect-ratio-crop-backdrop').remove();
       document.removeEventListener('keydown', this.escapeHandlerBound);
+      this.teardownFocusDot();
       this.cropper.destroy();
     },
   });

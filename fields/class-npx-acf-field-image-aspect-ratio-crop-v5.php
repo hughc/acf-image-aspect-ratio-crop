@@ -70,6 +70,7 @@ class npx_acf_field_image_aspect_ratio_crop extends acf_field
             'max_size' => 0,
             'mime_types' => '',
             'crop_type' => 'aspect_ratio',
+            'focus_point' => 0,
         ];
 
         $this->l10n = [
@@ -324,6 +325,18 @@ class npx_acf_field_image_aspect_ratio_crop extends acf_field
             'type' => 'text',
             'name' => 'mime_types',
         ]);
+
+        // focus point editor
+        acf_render_field_setting($field, [
+            'label' => __('Focus point editor', 'acf-image-aspect-ratio-crop'),
+            'instructions' => __(
+                'Show a moveable dot inside the crop area to define a point that will always be visible. Requires template code to use the resulting percentages.',
+                'acf-image-aspect-ratio-crop'
+            ),
+            'type' => 'true_false',
+            'name' => 'focus_point',
+            'ui' => 1,
+        ]);
     }
 
     /*
@@ -447,6 +460,7 @@ class npx_acf_field_image_aspect_ratio_crop extends acf_field
             'data-uploader' => $uploader,
             'data-post-id' => $this->get_form_post_id(),
             'data-crop_type' => $field['crop_type'],
+            'data-focus_point' => !empty($field['focus_point']) ? 1 : 0,
             'data-aspect_ratio_width' => array_key_exists(
                 'aspect_ratio_width',
                 $field
@@ -519,6 +533,27 @@ class npx_acf_field_image_aspect_ratio_crop extends acf_field
                 'acf_image_aspect_ratio_crop_coordinates',
                 true
             );
+
+            // Seed the saved focus point into the same payload the cropper
+            // restore already reads, so reopening a saved field after a page
+            // reload redraws the dot at its stored position instead of the
+            // default centre. The focus lives in its own meta key, separate
+            // from the crop rectangle.
+            if (is_array($coordinates)) {
+                $focus_point = get_post_meta(
+                    $image_id,
+                    'acf_image_aspect_ratio_crop_focus_point',
+                    true
+                );
+
+                if (
+                    is_array($focus_point) &&
+                    isset($focus_point['left'], $focus_point['top'])
+                ) {
+                    $coordinates['focusLeft'] = $focus_point['left'];
+                    $coordinates['focusTop'] = $focus_point['top'];
+                }
+            }
 
             $div['data-coordinates'] = $coordinates;
 
@@ -655,6 +690,10 @@ class npx_acf_field_image_aspect_ratio_crop extends acf_field
                 'acf-image-aspect-ratio-crop'
             ),
             'crop' => __('Crop', 'acf-image-aspect-ratio-crop'),
+            'focus_point' => __(
+                'Drag to set the focus point',
+                'acf-image-aspect-ratio-crop'
+            ),
             'cancel' => __('Cancel', 'acf-image-aspect-ratio-crop'),
             'modal_title' => __('Crop image', 'acf-image-aspect-ratio-crop'),
             'reset' => __('Reset crop', 'acf-image-aspect-ratio-crop'),
@@ -997,6 +1036,19 @@ class npx_acf_field_image_aspect_ratio_crop extends acf_field
                         $original[0]
                     );
                 }
+
+                $focus_point = get_post_meta(
+                    $image_id,
+                    'acf_image_aspect_ratio_crop_focus_point',
+                    true
+                );
+                $output['focus_point'] = is_array($focus_point) &&
+                isset($focus_point['left'], $focus_point['top'])
+                    ? [
+                        'left' => $focus_point['left'],
+                        'top' => $focus_point['top'],
+                    ]
+                    : null;
             }
 
             return $output;
