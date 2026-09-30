@@ -1,5 +1,4 @@
 /node_modules
-/assets/dist
 /vendor
 tests/output/*
 !tests/output/.gitkeep
