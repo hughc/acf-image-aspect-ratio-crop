@@ -7,7 +7,7 @@ Requires PHP: 5.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Donate link: https://github.com/sponsors/joppuyo
-Stable Tag: 6.0.6
+Stable Tag: 6.1.0
 
 ACF field that allows user to crop image to a specific aspect ratio or pixel size
 
@@ -20,6 +20,8 @@ After cropping, a new cropped image variant is created in the gallery and saved 
 The cropped image variants are hidden by default in the media browser and on the media page but you can view them by selecting the "list view" on the media page.
 
 There are three modes of operation: aspect ratio, pixel size and free crop. You can select this option when creating the field in ACF field options.
+
+This build is distributed from GitHub as a fork of the upstream plugin (taken at v6.0.6), adding one feature that upstream chose not to adopt: an optional **focus point editor**. When enabled per field, the crop modal shows a draggable dot that records a focus point as percentages of the crop area, for use as a CSS `background-position` with `background-size: cover`. The value is stored in the `acf_image_aspect_ratio_crop_focus_point` post meta of the cropped attachment, appended to the field value when the return type is Image Array, and readable from an attachment ID with `aiarc_get_focus_point()` and `aiarc_focus_point_style()`.
 
 = Aspect ratio =
 
@@ -103,8 +105,17 @@ The other plugin is not actively maintained and does not work well with latest A
 1. Cropping an image to 16:9 aspect ratio
 2. Cropping in progress
 3. Option to re-crop the image after upload
+4. Focus point editor in the crop modal
 
 == Changelog ==
+
+= 6.1.0 (2026-10-01) =
+* New: Optional focus point editor — a draggable dot in the crop modal, enabled per field
+* New: Focus point stored as percentages of the crop area in `acf_image_aspect_ratio_crop_focus_point` post meta
+* New: Focus point appended to the field value when the return type is Image Array
+* New: `aiarc_get_focus_point()` and `aiarc_focus_point_style()` helpers for attachment IDs
+* New: Focus point meta is cleared by Enable Media Replace and duplicated by WPML/PolyLang
+* Base: fork of upstream v6.0.6, distributed from GitHub
 
 = 6.0.6 (2026-09-10) =
 * Fix: Improved security on admin-ajax endpoints
