@@ -7,7 +7,7 @@ Requires PHP: 5.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Donate link: https://github.com/sponsors/joppuyo
-Stable Tag: 6.1.0
+Stable Tag: 6.1.1
 
 ACF field that allows user to crop image to a specific aspect ratio or pixel size
 
@@ -21,7 +21,7 @@ The cropped image variants are hidden by default in the media browser and on the
 
 There are three modes of operation: aspect ratio, pixel size and free crop. You can select this option when creating the field in ACF field options.
 
-This build is distributed from GitHub as a fork of the upstream plugin (taken at v6.0.6), adding one feature that upstream chose not to adopt: an optional **focus point editor**. When enabled per field, the crop modal shows a draggable dot that records a focus point as percentages of the crop area, for use as a CSS `background-position` with `background-size: cover`. The value is stored in the `acf_image_aspect_ratio_crop_focus_point` post meta of the cropped attachment, appended to the field value when the return type is Image Array, and readable from an attachment ID with `aiarc_get_focus_point()` and `aiarc_focus_point_style()`.
+This build is distributed from GitHub as a fork of the upstream plugin (upstream changes are merged in regularly; currently synced through v6.1.0), adding one feature that upstream chose not to adopt: an optional **focus point editor**. When enabled per field, the crop modal shows a draggable dot that records a focus point as percentages of the crop area, for use as a CSS `background-position` with `background-size: cover`. The value is stored in the `acf_image_aspect_ratio_crop_focus_point` post meta of the cropped attachment, appended to the field value when the return type is Image Array, and readable from an attachment ID with `aiarc_get_focus_point()` and `aiarc_focus_point_style()`.
 
 = Aspect ratio =
 
@@ -108,6 +108,11 @@ The other plugin is not actively maintained and does not work well with latest A
 4. Focus point editor in the crop modal
 
 == Changelog ==
+
+= 6.1.1 (2026-10-26) =
+* Base: merged upstream v6.0.7, v6.0.8 and v6.1.0
+* Fix: crop modal now works with ACF block API v3 (upstream v6.0.7)
+* Feature: upstream extension hooks `aiarc_pre_save_crop` and `aiarc_after_crop` (upstream v6.1.0)
 
 = 6.1.0 (2026-10-16) =
 * Feature: New extension hooks: `aiarc_pre_save_crop` and `aiarc_after_crop` (thanks @Jaska)

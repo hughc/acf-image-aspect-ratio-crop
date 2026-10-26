@@ -11,7 +11,9 @@
 
 ## Fork notice
 
-This repository is a **fork** of [joppuyo/acf-image-aspect-ratio-crop](https://github.com/joppuyo/acf-image-aspect-ratio-crop) by Johannes Siipola, taken at upstream release **v6.0.6**. The upstream plugin is still maintained for general fixes and compatibility — the author simply wasn't interested in adopting the focus point feature described below, so this fork exists to ship and maintain that one addition.
+This repository is a **fork** of [joppuyo/acf-image-aspect-ratio-crop](https://github.com/joppuyo/acf-image-aspect-ratio-crop) by Johannes Siipola. Upstream changes are merged into this fork regularly — the code is currently synced through upstream **v6.1.0**. The upstream plugin is still maintained for general fixes and compatibility — the author simply wasn't interested in adopting the focus point feature described below, so this fork exists to ship and maintain that one addition.
+
+Fork releases keep counting up from the upstream version they contain, so a fork release is always the newer one for GitHub Updater: the focus point editor first shipped as this fork's **v6.1.0** (based on upstream v6.0.6), and **v6.1.1** merges upstream v6.0.7 – v6.1.0 on top of it.
 
 This is not presented as a replacement or a "definitive" version of the plugin; it is the upstream plugin plus the focus point editor. It is a drop-in upgrade: existing fields, crops and settings created with the original keep working untouched, and the intent is to keep merging any fixes the upstream maintainer makes going forward.
 
@@ -162,6 +164,23 @@ The field's JavaScript and SCSS live in `assets/src` and are compiled with webpa
 1. Use the Node.js version in `.nvmrc` (`nvm use`).
 2. Run `npm install`.
 3. Run `npm run build` for a development build with source maps, or `NODE_OPTIONS=--openssl-legacy-provider npx webpack -p` for the production build the release uses.
+
+### Merging upstream changes
+
+The original repository is set up as a second remote, kept read-only and with
+upstream's tags fetched into their own namespace so they can never collide with
+this fork's release tags (upstream and the fork have both used `v6.1.0`):
+
+```
+git remote add upstream https://github.com/joppuyo/acf-image-aspect-ratio-crop.git
+git remote set-url --push upstream DISABLED_NO_PUSH   # never push to upstream
+git config remote.upstream.tagopt --no-tags
+git config --add remote.upstream.fetch '+refs/tags/*:refs/upstream/tags/*'
+```
+
+Upstream releases then appear as `refs/upstream/tags/v6.1.0` (fork releases stay plain `vX.Y.Z` tags on `origin`).
+
+To sync: `git fetch upstream`, merge `upstream/master` (or `refs/upstream/tags/<version>`) into `master`, resolve the usual conflicts in `readme.txt` (both sides keep a changelog) and `acf-image-aspect-ratio-crop.php` (version header), rebuild `assets/src` into `assets/dist` and commit it, then bump the fork version above the merged upstream version and tag the release.
 
 ## Thanks
 
