@@ -109,7 +109,16 @@ The other plugin is not actively maintained and does not work well with latest A
 
 == Changelog ==
 
-= 6.1.0 (2026-10-01) =
+= 6.1.0 (2026-10-16) =
+* Feature: New extension hooks: `aiarc_pre_save_crop` and `aiarc_after_crop` (thanks @Jaska)
+
+= 6.0.8 (2026-10-16) =
+* Fix: Deployment fix
+
+= 6.0.7 (2026-10-16) =
+* Fix: Fixed issue where the crop modal did not function properly with ACF block API v3
+
+= 6.1.0-focus (2026-10-01) — this fork, based on upstream v6.0.6 =
 * New: Optional focus point editor — a draggable dot in the crop modal, enabled per field
 * New: Focus point stored as percentages of the crop area in `acf_image_aspect_ratio_crop_focus_point` post meta
 * New: Focus point appended to the field value when the return type is Image Array

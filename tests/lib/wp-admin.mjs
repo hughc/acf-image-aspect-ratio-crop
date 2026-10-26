@@ -172,9 +172,14 @@ async function openMetaBoxesPanel(page) {
     preferences.set('core/edit-post', 'metaBoxesMainIsOpen', true);
     preferences.set('core/edit-post', 'metaBoxesMainOpenHeight', 600);
   });
-  await page.waitForSelector('.edit-post-meta-boxes-main .acf-field', {
-    visible: true,
-  });
+
+  // A post whose only ACF fields live in blocks has no ACF meta box to wait
+  // for
+  if (await page.$('.edit-post-meta-boxes-main .acf-postbox')) {
+    await page.waitForSelector('.edit-post-meta-boxes-main .acf-field', {
+      visible: true,
+    });
+  }
 }
 
 async function waitForEditor(page) {
@@ -277,6 +282,163 @@ export async function updatePost(page) {
   await waitForSnackbar(page, 'Post updated.');
   await waitForSaveToFinish(page);
 }
+
+/**
+ * Inserts a block at the end of the post and returns its client id.
+ */
+export async function insertBlock(page, name) {
+  return page.evaluate((blockName) => {
+    const block = window.wp.blocks.createBlock(blockName);
+
+    window.wp.data.dispatch('core/block-editor').insertBlocks(block);
+
+    return block.clientId;
+  }, name);
+}
+
+/**
+ * The client id of the first block with the given name in the post.
+ */
+export async function findBlock(page, name) {
+  return page.evaluate(
+    (blockName) =>
+      window.wp.data
+        .select('core/block-editor')
+        .getBlocks()
+        .find((block) => block.name === blockName)?.clientId,
+    name,
+  );
+}
+
+/**
+ * Switches an ACF block between edit mode, where its fields render inside
+ * the block in the canvas, and preview mode, where they render in the block
+ * sidebar while the block is selected. This is what the mode button in the
+ * block toolbar does.
+ */
+export async function setAcfBlockMode(page, clientId, mode) {
+  await page.evaluate(
+    (id, value) =>
+      window.wp.data
+        .dispatch('core/block-editor')
+        .updateBlockAttributes(id, { mode: value }),
+    clientId,
+    mode,
+  );
+}
+
+/**
+ * Selects a block and opens the block tab of the settings sidebar.
+ */
+export async function selectBlockInSidebar(page, clientId) {
+  await page.evaluate((id) => {
+    window.wp.data.dispatch('core/block-editor').selectBlock(id);
+    window.wp.data
+      .dispatch('core/edit-post')
+      .openGeneralSidebar('edit-post/block');
+  }, clientId);
+}
+
+/**
+ * Waits until an ACF block's attributes in the editor store hold the given
+ * value. ACF copies form changes into the attributes asynchronously, and
+ * only the attributes are saved with the post.
+ */
+export async function waitForBlockData(page, clientId, value) {
+  await page.waitForFunction(
+    (id, expected) => {
+      const block = window.wp.data.select('core/block-editor').getBlock(id);
+
+      return Object.values(block?.attributes.data || {}).some(
+        (candidate) => String(candidate) === expected,
+      );
+    },
+    { timeout: 30000 },
+    clientId,
+    String(value),
+  );
+}
+
+export async function clearBlockSelection(page) {
+  await page.evaluate(() =>
+    window.wp.data.dispatch('core/block-editor').clearSelectedBlock(),
+  );
+}
+
+/**
+ * Root selectors for the two places an ACF block renders its fields.
+ */
+export function blockCanvasRoot(clientId) {
+  // WordPress 5.3 puts data-block on an inner element, but every version
+  // gives the block wrapper this id
+  return `#block-${clientId}`;
+}
+
+// ACF's own wrapper for the sidebar form, the block inspector around it has
+// no stable class name across WordPress versions
+export const blockSidebarRoot = '.acf-block-panel';
+
+/**
+ * Waits for a selected ACF block to render its form and returns the root
+ * selector of where it did. That is the canvas in edit mode, unless the
+ * canvas is an iframe: ACF cannot edit fields there, so it switches the block
+ * to preview mode and renders the form in the sidebar instead.
+ */
+export async function waitForBlockForm(page, clientId) {
+  const roots = [blockCanvasRoot(clientId), blockSidebarRoot];
+
+  const root = await page.waitForFunction(
+    (candidates) =>
+      candidates.find((candidate) =>
+        document.querySelector(
+          `${candidate} .acf-field-image-aspect-ratio-crop`,
+        ),
+      ),
+    { timeout: 30000 },
+    roots,
+  );
+
+  return root.jsonValue();
+}
+
+// The full screen modal ACF block version 3 edits fields in
+export const expandedEditorRoot = '.acf-block-form-modal';
+
+/**
+ * Opens the expanded editor of the selected ACF block version 3 block from
+ * the button in the block sidebar.
+ */
+export async function openExpandedEditor(page) {
+  await page.locator('.acf-blocks-open-expanded-editor-btn').click();
+  await page.waitForSelector(
+    `${expandedEditorRoot} .acf-field-image-aspect-ratio-crop`,
+    { visible: true },
+  );
+}
+
+/**
+ * Closes the expanded editor with its Done button, which stays disabled
+ * while ACF saves the form.
+ */
+export async function closeExpandedEditor(page) {
+  const done = await page.waitForFunction(
+    (root) =>
+      Array.from(document.querySelectorAll(`${root} button`)).find(
+        (button) => button.textContent.trim() === 'Done' && !button.disabled,
+      ),
+    { timeout: 30000 },
+    expandedEditorRoot,
+  );
+
+  await done.click();
+  await page.waitForSelector(expandedEditorRoot, { hidden: true });
+}
+
+/**
+ * Root selector of the meta box of the aiarc-test-meta-box fixture plugin.
+ * ACF gives each meta box the id acf-<field group key>.
+ */
+export const metaBoxRoot = '#acf-group_aiarc_test_meta_box';
 
 /**
  * File names shown in the list view of the media library, which is the only
