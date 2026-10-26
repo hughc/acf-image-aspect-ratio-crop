@@ -1,12 +1,19 @@
 {
-  "name": "joppuyo/acf-image-aspect-ratio-crop",
-  "description": "ACF field that allows user to crop image to a specific aspect ratio",
+  "name": "highbrow/acf-image-aspect-ratio-crop",
+  "description": "ACF field that allows user to crop image to a specific aspect ratio, with an optional focus point setter",
   "type": "wordpress-plugin",
   "license": "GPL-2.0-or-later",
   "authors": [
     {
+      "name": "Highbrow",
+      "homepage": "https://highbrow.com.au/",
+      "role": "Fork maintainer"
+    },
+    {
       "name": "Johannes Siipola",
-      "email": "johannes@siipo.la"
+      "email": "johannes@siipo.la",
+      "homepage": "https://siipo.la",
+      "role": "Original author"
     }
   ]
 }

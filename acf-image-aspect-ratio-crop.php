@@ -1,12 +1,12 @@
 <?php
 
 /*
-Plugin Name: Image Aspect Ratio Crop for Advanced Custom Fields
-Plugin URI: https://github.com/joppuyo/acf-image-aspect-ratio-crop
-Description: ACF field that allows user to crop image to a specific aspect ratio or pixel size
+Plugin Name: Image Aspect Ratio Crop for ACF with Focus Point Setter
+Plugin URI: https://highbrow.com.au/plugin/acf-image-aspect-ratio-crop-with-focus-point-setter/
+Description: ACF field that allows user to crop image to a specific aspect ratio or pixel size, with an optional focus point setter in the crop modal
 Version: 6.1.1
-Author: Johannes Siipola
-Author URI: https://siipo.la
+Author: Highbrow (fork of Image Aspect Ratio Crop by Johannes Siipola)
+Author URI: https://highbrow.com.au/
 GitHub Plugin URI: https://github.com/hughc/acf-image-aspect-ratio-crop
 GitHub Primary Branch: master
 GitHub Updater Show Previews: true
@@ -348,7 +348,7 @@ class npx_acf_plugin_image_aspect_ratio_crop
                         $links,
                         '<a href="https://github.com/sponsors/joppuyo">' .
                             esc_html__(
-                                'Support development on GitHub Sponsors',
+                                'Support the original author on GitHub Sponsors',
                                 'acf-image-aspect-ratio-crop'
                             ) .
                             '</a>'

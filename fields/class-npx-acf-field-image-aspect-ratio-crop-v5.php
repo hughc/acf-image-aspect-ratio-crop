@@ -326,9 +326,9 @@ class npx_acf_field_image_aspect_ratio_crop extends acf_field
             'name' => 'mime_types',
         ]);
 
-        // focus point editor
+        // focus point setter
         acf_render_field_setting($field, [
-            'label' => __('Focus point editor', 'acf-image-aspect-ratio-crop'),
+            'label' => __('Focus point setter', 'acf-image-aspect-ratio-crop'),
             'instructions' => __(
                 'Show a moveable dot inside the crop area to define a point that will always be visible. Requires template code to use the resulting percentages.',
                 'acf-image-aspect-ratio-crop'

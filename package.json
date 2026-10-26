@@ -1,8 +1,11 @@
 {
   "name": "acf-image-aspect-ratio-crop",
-  "description": "ACF field that allows user to crop image to a specific aspect ratio",
-  "repository": "git@github.com:joppuyo/acf-image-aspect-ratio-crop.git",
+  "description": "ACF field that allows user to crop image to a specific aspect ratio, with an optional focus point setter",
+  "repository": "git@github.com:hughc/acf-image-aspect-ratio-crop.git",
   "author": "Johannes Siipola <johannes@siipo.la>",
+  "contributors": [
+    "Highbrow <hc@highbrow.com.au>"
+  ],
   "license": "GPL-2.0-or-later",
   "private": false,
   "dependencies": {

@@ -1,4 +1,6 @@
-# ACF Image Aspect Ratio Crop Field (with Focus Point Editor)
+# Image Aspect Ratio Crop for ACF with Focus Point Setter
+
+Maintained by [Highbrow](https://highbrow.com.au/) — product page: <https://highbrow.com.au/plugin/acf-image-aspect-ratio-crop-with-focus-point-setter/>
 
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/joppuyo/acf-image-aspect-ratio-crop/main.yml?branch=master&logo=github)](https://github.com/joppuyo/acf-image-aspect-ratio-crop/actions/workflows/main.yml)
 [![WordPress plugin](https://img.shields.io/wordpress/plugin/v/acf-image-aspect-ratio-crop?logo=wordpress)](https://wordpress.org/plugins/acf-image-aspect-ratio-crop/)
@@ -9,29 +11,31 @@
 [![WordPress Plugin: Tested WP Version](https://img.shields.io/badge/dynamic/json?label=tested&logo=wordpress&prefix=v&color=green&query=%24.tested&url=https%3A%2F%2Fapi.wordpress.org%2Fplugins%2Finfo%2F1.0%2Facf-image-aspect-ratio-crop.json)](https://wordpress.org/plugins/acf-image-aspect-ratio-crop/)
 [![Inactively Maintained](https://img.shields.io/badge/Maintenance%20Level-Inactively%20Maintained-yellowgreen.svg)](https://gist.github.com/cheerfulstoic/d107229326a01ff0f333a1d3476e068d)
 
+_The badges above describe the **upstream** plugin (its CI, its WordPress.org ratings and stats), not this fork._
+
 ## Fork notice
 
 This repository is a **fork** of [joppuyo/acf-image-aspect-ratio-crop](https://github.com/joppuyo/acf-image-aspect-ratio-crop) by Johannes Siipola. Upstream changes are merged into this fork regularly — the code is currently synced through upstream **v6.1.0**. The upstream plugin is still maintained for general fixes and compatibility — the author simply wasn't interested in adopting the focus point feature described below, so this fork exists to ship and maintain that one addition.
 
-Fork releases keep counting up from the upstream version they contain, so a fork release is always the newer one for GitHub Updater: the focus point editor first shipped as this fork's **v6.1.0** (based on upstream v6.0.6), and **v6.1.1** merges upstream v6.0.7 – v6.1.0 on top of it.
+Fork releases keep counting up from the upstream version they contain, so a fork release is always the newer one for GitHub Updater: the focus point setter first shipped as this fork's **v6.1.0** (based on upstream v6.0.6), and **v6.1.1** merges upstream v6.0.7 – v6.1.0 on top of it.
 
-This is not presented as a replacement or a "definitive" version of the plugin; it is the upstream plugin plus the focus point editor. It is a drop-in upgrade: existing fields, crops and settings created with the original keep working untouched, and the intent is to keep merging any fixes the upstream maintainer makes going forward.
+This is not presented as a replacement or a "definitive" version of the plugin; it is the upstream plugin plus the focus point setter. It is a drop-in upgrade: existing fields, crops and settings created with the original keep working untouched, and the intent is to keep merging any fixes the upstream maintainer makes going forward.
 
 **Issues and pull requests are welcome for anything relating to the focus point feature.** For general upstream concerns (the cropping behaviour itself, WordPress / ACF compatibility and so on), [the original repository](https://github.com/joppuyo/acf-image-aspect-ratio-crop) remains the right place to raise them.
 
-### New in this fork: focus point editor
+### New in this fork: focus point setter
 
-This fork adds an optional **focus point editor** to the crop modal. When enabled on a field, a draggable dot appears inside the crop area. Wherever you place the dot is recorded as a **focus point** — percentage horizontal / vertical coordinates *within the crop rectangle* — and saved alongside the existing crop data.
+This fork adds an optional **focus point setter** to the crop modal. When enabled on a field, a draggable dot appears inside the crop area. Wherever you place the dot is recorded as a **focus point** — percentage horizontal / vertical coordinates *within the crop rectangle* — and saved alongside the existing crop data.
 
 The values are ready to use as a CSS `background-position` for an image rendered with `background-size: cover`: the focus point marks the important part of the photo (a face, the subject) so a container of any aspect ratio can position toward it instead of defaulting to centre.
 
-![Focus point editor](./.wordpress-org/screenshot-4.png)
+![Focus point setter](./.wordpress-org/screenshot-4.png)
 
 Details:
 
 - Stored as percentages (0–100 of the crop area) in post meta `acf_image_aspect_ratio_crop_focus_point` on the cropped attachment.
 - The dot keeps its relative position while you resize or move the crop rectangle, and its saved position is restored whenever the image is re-cropped
-- The feature is **opt-in per field** (a "Focus point editor" setting) and **off by default**, so behaviour is unchanged unless you enable it.
+- The feature is **opt-in per field** (a "Focus point setter" setting) and **off by default**, so behaviour is unchanged unless you enable it.
 - Available for all three crop modes (aspect ratio, pixel size and free crop).
 
 #### Using the focus point in a template

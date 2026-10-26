@@ -1,5 +1,5 @@
-=== Image Aspect Ratio Crop Field for Advanced Custom Fields ===
-Contributors: joppuyo
+=== Image Aspect Ratio Crop for ACF with Focus Point Setter ===
+Contributors: joppuyo, hughc
 Tags: acf, field, image, crop
 Requires at least: 4.9
 Tested up to: 7.1
@@ -9,7 +9,7 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Donate link: https://github.com/sponsors/joppuyo
 Stable Tag: 6.1.1
 
-ACF field that allows user to crop image to a specific aspect ratio or pixel size
+ACF field that allows user to crop image to a specific aspect ratio or pixel size, with an optional focus point setter
 
 == Description ==
 
@@ -21,7 +21,7 @@ The cropped image variants are hidden by default in the media browser and on the
 
 There are three modes of operation: aspect ratio, pixel size and free crop. You can select this option when creating the field in ACF field options.
 
-This build is distributed from GitHub as a fork of the upstream plugin (upstream changes are merged in regularly; currently synced through v6.1.0), adding one feature that upstream chose not to adopt: an optional **focus point editor**. When enabled per field, the crop modal shows a draggable dot that records a focus point as percentages of the crop area, for use as a CSS `background-position` with `background-size: cover`. The value is stored in the `acf_image_aspect_ratio_crop_focus_point` post meta of the cropped attachment, appended to the field value when the return type is Image Array, and readable from an attachment ID with `aiarc_get_focus_point()` and `aiarc_focus_point_style()`.
+This build is maintained by Highbrow as a fork of the upstream plugin by Johannes Siipola (upstream changes are merged in regularly; currently synced through v6.1.0), adding one feature that upstream chose not to adopt: an optional **focus point setter**. When enabled per field, the crop modal shows a draggable dot that records a focus point as percentages of the crop area, for use as a CSS `background-position` with `background-size: cover`. The value is stored in the `acf_image_aspect_ratio_crop_focus_point` post meta of the cropped attachment, appended to the field value when the return type is Image Array, and readable from an attachment ID with `aiarc_get_focus_point()` and `aiarc_focus_point_style()`. Product page: https://highbrow.com.au/plugin/acf-image-aspect-ratio-crop-with-focus-point-setter/
 
 = Aspect ratio =
 
@@ -88,7 +88,7 @@ No, not really. Beaver Builder only supports built-in ACF fields. Please contact
 
 = I have an issue or I want to contribute code =
 
-Please use the [GitHub repository](https://github.com/joppuyo/acf-image-aspect-ratio-crop) to raise [issues](https://github.com/joppuyo/acf-image-aspect-ratio-crop/issues) about the plugin. You are also free to send a pull request on GitHub.
+For anything relating to the focus point setter, please use [this fork's GitHub repository](https://github.com/hughc/acf-image-aspect-ratio-crop) or the [product page](https://highbrow.com.au/plugin/acf-image-aspect-ratio-crop-with-focus-point-setter/). For general questions about the cropping behaviour or WordPress / ACF compatibility, [the original repository](https://github.com/joppuyo/acf-image-aspect-ratio-crop) by Johannes Siipola remains the right place.
 
 = How is this different from the other plugin? =
 
@@ -105,11 +105,12 @@ The other plugin is not actively maintained and does not work well with latest A
 1. Cropping an image to 16:9 aspect ratio
 2. Cropping in progress
 3. Option to re-crop the image after upload
-4. Focus point editor in the crop modal
+4. Focus point setter in the crop modal
 
 == Changelog ==
 
 = 6.1.1 (2026-10-26) =
+* New: Fork branding — published by Highbrow as "Image Aspect Ratio Crop for ACF with Focus Point Setter"; the focus point feature is renamed from "editor" to "setter"
 * Base: merged upstream v6.0.7, v6.0.8 and v6.1.0
 * Fix: crop modal now works with ACF block API v3 (upstream v6.0.7)
 * Feature: upstream extension hooks `aiarc_pre_save_crop` and `aiarc_after_crop` (upstream v6.1.0)
