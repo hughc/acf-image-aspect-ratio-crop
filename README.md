@@ -184,7 +184,19 @@ git config --add remote.upstream.fetch '+refs/tags/*:refs/upstream/tags/*'
 
 Upstream releases then appear as `refs/upstream/tags/v6.1.0` (fork releases stay plain `vX.Y.Z` tags on `origin`).
 
-To sync: `git fetch upstream`, merge `upstream/master` (or `refs/upstream/tags/<version>`) into `master`, resolve the usual conflicts in `readme.txt` (both sides keep a changelog) and `acf-image-aspect-ratio-crop.php` (version header), rebuild `assets/src` into `assets/dist` and commit it, then bump the fork version above the merged upstream version and tag the release.
+To sync: `git fetch upstream`, merge `upstream/master` (or `refs/upstream/tags/<version>`) into `master`, rebuild `assets/src` into `assets/dist` and commit it, then bump the fork version above the merged upstream version and tag the release.
+
+#### Resolving the conflicts
+
+Take **only upstream's behaviour**: code, tests, and its changelog entries (appended below the fork's own — the fork's released `6.1.0` entry stays labelled `6.1.0-focus`).
+
+Everything fork-owned wins the conflict and is left untouched:
+
+- the plugin header block in `acf-image-aspect-ratio-crop.php` — `Plugin Name`, `Plugin URI`, `Description`, `Author`, `Author URI`, `Text Domain`, and the `GitHub Plugin URI` / `GitHub Primary Branch` / `GitHub Updater Show Previews` headers;
+- the fork sections of `readme.txt` — title line, `Contributors`, short description, the fork description paragraph with the product page, the support FAQ and the screenshot list;
+- `README.md` in full (heading, fork notice, badges, Download and Development sections).
+
+The one upstream value that is ever looked at is its `Version:` — and it is never kept as-is: the fork version is re-bumped above the merged upstream release, and `readme.txt`'s `Stable Tag` follows the fork version, not upstream's.
 
 ## Thanks
 
