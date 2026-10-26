@@ -348,7 +348,8 @@ __webpack_require__.r(__webpack_exports__);
     $img: null,
     actions: {
       ready: 'initialize',
-      append: 'initialize'
+      append: 'initialize',
+      remount: 'initialize'
     },
     events: {
       'click a[data-name="add"]': 'add',
@@ -485,7 +486,7 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       this.escapeHandlerBound = this.escapeHandler.bind(this);
-      $(document).on('click', '.js-acf-image-aspect-ratio-crop-cancel', function () {
+      $(document).off('click', '.js-acf-image-aspect-ratio-crop-cancel').on('click', '.js-acf-image-aspect-ratio-crop-cancel', function () {
         return _this2.closeModal();
       });
       $(document).off('click', '.js-acf-image-aspect-ratio-crop-reset').on('click', '.js-acf-image-aspect-ratio-crop-reset', function () {
